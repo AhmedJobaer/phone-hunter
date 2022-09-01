@@ -1,15 +1,22 @@
-const loadPhone = (search) => {
+const loadPhone = async (search, dataLimit) => {
     const url = `https://openapi.programming-hero.com/api/phones?search=${search}`
-    fetch(url)
-        .then(res => res.json())
-        .then(data => displayPhones(data.data))
+    const res = await fetch(url);
+    const data = await res.json();
+    displayPhones(data.data, dataLimit)
 }
 
-const displayPhones = phones => {
+const displayPhones = (phones, dataLimit) => {
     const phonesContainer = document.getElementById('phone-container');
     phonesContainer.innerHTML = ``;
-    //Display 20 phonea only
-    phones = phones.slice(0, 20);
+    //Display 10 phonea only
+    const showBtn = document.getElementById('show-all');
+    if (dataLimit && phones.length > 10) {
+        phones = phones.slice(0, 10);
+        showBtn.classList.remove('d-none')
+    }
+    else {
+        showBtn.classList.add('d-none')
+    }
     //display no phone
     const noPhon = document.getElementById('no-found-mgs');
     if (phones.length === 0) {
@@ -31,7 +38,8 @@ const displayPhones = phones => {
                 <p class="card-text">This is a longer card with supporting text below as a natural
                 lead-in
                 to additional content. This content is a little bit longer.</p>
-            </div>
+                <button onclick="loadPhoneDetail('${phone.slug}')" href="#" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#phoneDetailModal">Show Details</button>
+                
         </div>
         `;
         phonesContainer.appendChild(phoneDiv);
@@ -42,14 +50,30 @@ const displayPhones = phones => {
 
 }
 
-document.getElementById('btn-search').addEventListener('click', function () {
-    // start loader
+const processSearch = (dataLimit) => {
     toggleSpinner(true)
     const searchField = document.getElementById('search-field');
-    loadPhone(searchField.value);
-    searchField.value = '';
+    const searchText = searchField.value;
+    loadPhone(searchText, dataLimit);
+    //searchField.value = '';
+    // console.log('showall');
+}
+
+
+document.getElementById('btn-search').addEventListener('click', function () {
+    // start loader
+    processSearch(10);
+
 })
 
+
+/// search input field enter key handeller
+
+document.getElementById('search-field').addEventListener('keypress', function (e) {
+    if (e.key === 'Enter') {
+        processSearch(10);
+    }
+})
 
 const toggleSpinner = isLoading => {
     const loaderSec = document.getElementById('loader');
@@ -59,4 +83,28 @@ const toggleSpinner = isLoading => {
     else {
         loaderSec.classList.add('d-none');
     }
-} 
+}
+
+
+document.getElementById('btn-show-all').addEventListener('click', function () {
+    processSearch();
+})
+
+
+
+const loadPhoneDetail = async id => {
+    const url = `https://openapi.programming-hero.com/api/phone/${id}`;
+    const res = await fetch(url);
+    const data = await res.json();
+    displayPhoneDetail(data.data);
+}
+
+const displayPhoneDetail = phone => {
+    const modalTitle = document.getElementById('phoneDetailModalLabel');
+    modalTitle.innerText = phone.name;
+    const phoneDetail = document.getElementById('phone-details');
+    phoneDetail.innerHTML = `
+        <p>Realase Date: ${phone.releaseDate ? phone.releaseDate : 'None'}</p>
+        <p>Others: ${phone.others ? phone.others.Bluetooth : 'None'}</p>
+    `;
+}
