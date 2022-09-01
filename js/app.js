@@ -11,7 +11,15 @@ const displayPhones = phones => {
     //Display 20 phonea only
     phones = phones.slice(0, 20);
     //display no phone
-    //display all phone
+    const noPhon = document.getElementById('no-found-mgs');
+    if (phones.length === 0) {
+        noPhon.classList.remove('d-none')
+    }
+    else {
+        noPhon.classList.add('d-none')
+    }
+
+    //display all phone 
     phones.forEach(phone => {
         const phoneDiv = document.createElement('div');
         phoneDiv.classList.add('col');
@@ -29,12 +37,26 @@ const displayPhones = phones => {
         phonesContainer.appendChild(phoneDiv);
     })
 
+    //stop loadder
+    toggleSpinner(false)
 
 }
 
 document.getElementById('btn-search').addEventListener('click', function () {
+    // start loader
+    toggleSpinner(true)
     const searchField = document.getElementById('search-field');
     loadPhone(searchField.value);
     searchField.value = '';
 })
 
+
+const toggleSpinner = isLoading => {
+    const loaderSec = document.getElementById('loader');
+    if (isLoading) {
+        loaderSec.classList.remove('d-none');
+    }
+    else {
+        loaderSec.classList.add('d-none');
+    }
+} 
